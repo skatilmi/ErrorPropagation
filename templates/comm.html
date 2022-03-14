@@ -1,0 +1,18 @@
+{% extends "index.html" %} {% block title %}Demos{% endblock %} {% block content
+%} {% for field in fields %}
+
+<button type="button" class="collapsible">
+  {{ field.latex_code_mathpix }}
+</button>
+<div class="content">
+  <p></p>
+  <div class="tex_code">{{ field.latex_code_raw }}</div>
+  {{field.latex_code_raw}} {% if field.python_code %}
+
+  <pre><code class="python">{{field.python_code}}</code></pre>
+  {% endif %}
+</div>
+
+{% endfor %}
+
+{% endblock %}

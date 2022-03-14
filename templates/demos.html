@@ -1,0 +1,12 @@
+{% extends "index.html" %} {% block title %}Demos{% endblock %} {% block content
+%} {% for field in fields %}
+
+<button type="button" class="demo_btn" onclick="window.location.href='demos/{{field.demo_name}}'">
+  {{ field.latex_code_mathpix }}
+</button>
+
+{% endfor %}
+
+
+
+{% endblock %}

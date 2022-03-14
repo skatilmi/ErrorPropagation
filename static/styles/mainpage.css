@@ -1,0 +1,84 @@
+body {
+  padding-bottom: 3em;
+}
+
+.form {
+  padding-left: 1em;
+}
+
+.description {
+  padding-left: 1em;
+  padding-top: 1em;
+}
+
+input.text {
+  width: 100%;
+  height: 2em;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  padding-left: 1em;
+}
+
+input.btn {
+  background-color: rgb(173, 161, 146);
+  border-radius: 1em;
+  size: 1em;
+  display: inline-block;
+}
+.tex_code {
+  font-size: 0em;
+}
+
+.collapsible {
+  background-color: #777;
+  color: rgb(241, 226, 206);
+  cursor: pointer;
+  padding: 1em;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 15px;
+  border-radius: 15px;
+}
+.active,
+.collapsible:hover {
+  background-color: #555;
+}
+.demo_btn {
+  background-color: #777;
+  color: rgb(241, 226, 206);
+  cursor: pointer;
+  padding: 1em;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 15px;
+  border-radius: 15px;
+}
+.active,
+.demo_btn:hover {
+  background-color: #555;
+}
+
+.content {
+  padding: 0 18px;
+  display: none;
+  overflow: hidden;
+  background-color: rgb(201, 187, 170);
+  border-radius: 15px;
+}
+
+.svg_copy {
+  font-size: 0%;
+  width: 20px;
+  height: 20px;
+  margin-left: 10px;
+  margin-top: -5px;
+}
+
+input[type="submit"] {
+  height: 3em;
+  width: 7em;
+}

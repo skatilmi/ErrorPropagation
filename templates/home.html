@@ -1,0 +1,51 @@
+{% extends "index.html" %} {% block title %}Home{% endblock %} {% block content
+%}
+
+<div class="description">
+  You can write greek letters in latex style, but without the backslash.
+  <details>
+    <summary>click to expand supported greek letters</summary>
+    {{greek_letters}}
+  </details>
+
+  <br />
+  You can set errors of specific parameters to zero by typing them in the second
+  line edit and seperating them with a comma.<br />
+  Click on the output cells to see the latex representation. You can also find
+  the copyable python function for the error.<br />
+  Do not use "|arg|" or "abs(arg)", use "Abs(arg)" instead. <br />
+  Do not use the standalone symbol "f" unless you want to use it as an index or
+  with and index or as a function. <br />
+  "e" and "E" alone are reserverd for eulers number. <br />
+  Do not use the standalone symbol "E" if you want to use the exponential
+  function. <br />
+  If you want to use the exponential function, use "exp(arg)". <br />
+  For the imaginary unit, use "1j". <br />
+
+  <div class="form">
+    <form method="POST">
+      <div class="fromdescription">
+        <label>function name:</label><br />
+        <input type="text" name="fname" value="{{ coockie.fname }}" placeholder="f" /><br />
+      </div>
+
+      <div class="fromdescription">
+        <label>expression:</label><br />
+        <input type="text" name="expression" placeholder="a_0**2/cos(k_1/k_2)**4" /><br />
+      </div>
+
+      <div class="fromdescription">
+        <label>set error of following variables to zero (works not every time) </label><br />
+        <input type="text" name="zeros" placeholder="k_1" /><br />
+      </div>
+      <input type="submit" value="Submit" /><br />
+
+      <div class="fromdescription">
+        <input type="checkbox" id="relative_error" name="relative_error" />
+        <label for="relative_error">substitute error of symbols with their relative_error (doesnt work
+          properly, use at your own risk)</label>
+      </div>
+    </form>
+  </div>
+  {% endblock %}
+</div>
