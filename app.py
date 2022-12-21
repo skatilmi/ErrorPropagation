@@ -100,4 +100,4 @@ def get_relative_error_checkbox():
 
 if __name__ == '__main__':
     #app.run(host='192.168.178.125', port=5000)
-    app.run()
+    app.run(host='0.0.0.0')
