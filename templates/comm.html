@@ -1,18 +1,36 @@
 {% extends "index.html" %} {% block title %}Demos{% endblock %} {% block content
-%} {% for field in fields %}
+%}
 
-<button type="button" class="collapsible">
-  {{ field.latex_code_mathpix }}
-</button>
-<div class="content">
-  <p></p>
-  <div class="tex_code">{{ field.latex_code_raw }}</div>
-  {{field.latex_code_raw}} {% if field.python_code %}
+<div class="resultspage">
+  {% for field in fields %}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/canvg/1.5/canvg.min.js"></script>
 
-  <pre><code class="python">{{field.python_code}}</code></pre>
-  {% endif %}
+
+  <div class="content">
+
+    <div class="latexField">
+      <div class="box content">
+
+        <div class="renderLatex">{{ field.latex_code_mathpix }}</div>
+        <button type="button" class="download-button" onclick="downloadSVGAsPNG(this, 5)">PNG (double-click)</button>
+        <!-- <button type="button" class="copy-button" onclick="copyCode(this)">Copy</button> -->
+        <!-- <button type="button" class="copy-button" onclick="copyCode(this)">Copy</button> -->
+
+      </div>
+    </div>
+    <!-- {% if field.python_code %} -->
+    <div class="box content scrollable">
+      <pre><code class="tex_code">{{field.latex_code_raw}}</code></pre>
+      <button type="button" class="copy-button" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <div class="box content scrollable">
+      <pre><code class="python scrollable">{{field.python_code}}</code></pre>
+      <button type="button" class="copy-button" onclick="copyCode(this)">Copy</button>
+    </div>
+    <!-- {% endif %} -->
+  </div>
+  {% endfor %}
 </div>
-
-{% endfor %}
 
 {% endblock %}
