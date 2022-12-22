@@ -175,16 +175,18 @@ class Error_propagation:
 
     def set_html_codes(self, zeros=[]):
         self.fields += [
-            Field(self.function_name+' = '+self._f, gpr(self.f, nosqrt=True)),
-            Field(self.wrap_error(self._err1), gpr(self.error)),
-            Field(self.wrap_error(self._err1_simple)),
+            Field(self.function_name+' = '+self._f,
+                  self.gpr(self.f, nosqrt=True)),
+            Field(self.wrap_error(self._err1), self.gpr(self.error)),
+            Field(self.wrap_error(self._err1_simple),
+                  self.gpr(self.error_simple, delta=True)),
         ]
 
         if not self.substitution:
             return
 
         self.fields += [
-            Field(self.wrap_error(self._err2, zeros), gpr(self.error_0))
+            Field(self.wrap_error(self._err2, zeros), self.gpr(self.error_0))
         ]
 
     def wrap_error(self, expression, zeros=[]):
@@ -201,24 +203,23 @@ class Error_propagation:
             tail = ''
         return '\Delta '+self.function_name+tail+' = '+expression
 
+    def gpr(self, *args, **kwargs):
+        return self.get_python_represenaion(*args, **kwargs)
 
-def gpr(*args, **kwargs):
-    return get_python_represenaion(*args, **kwargs)
+    def get_python_represenaion(self, expression, nosqrt=False, delta=False):
+        if not nosqrt:
+            expression = sp.sqrt(expression)
+        p = str(expression).replace('\\', '').replace('Delta ', 'Delta_')
 
-
-def get_python_represenaion(expression, nosqrt=False):
-    if not nosqrt:
-        expression = sp.sqrt(expression)
-    p = str(expression).replace('\\', '').replace('Delta ', 'Delta_')
-
-    c = Code(sp.Symbol('xxxxxxxxxxxxxxxxxxxxxx'), p).raw_code[1:-1]
-    free_symbols = ', '.join(list(map(str,
-                                      list(expression.free_symbols)
+        c = Code(sp.Symbol('xxxxxxxxxxxxxxxxxxxxxx'), p).raw_code[1:-1]
+        free_symbols = ', '.join(list(map(str,
+                                          list(expression.free_symbols)
+                                          )
                                       )
-                                  )
-                             ).replace('\\', '').replace('Delta ', 'Delta_')
-    c = 'def f('+free_symbols+'):\n  return '+c
-    return c
+                                 ).replace('\\', '').replace('Delta ', 'Delta_')
+
+        c = f'def {self.function_name}(*, {free_symbols}):\n  return {c}'
+        return c
 
 
 def mathpix(expression):
