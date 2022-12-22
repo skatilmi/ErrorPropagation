@@ -1,84 +1,270 @@
 body {
-  padding-bottom: 3em;
+    font-family: sans-serif;
+    color: #333;
+}
+
+.copy-button {
+    background-color: #333;
+    color: #fff;
+    font-weight: bold;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+
+.copy-button:hover {
+    background-color: #444;
+}
+
+.download-button {
+    background-color: #333;
+    color: #fff;
+    font-weight: bold;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+
+.download-button:hover {
+    background-color: #444;
+}
+
+
+.content {
+    border: 2px solid #333;
+    border-radius: 5px;
+    padding: 20px;
+    margin: 1em;
+}
+
+
+.description {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
 }
 
 .form {
-  padding-left: 1em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
 }
 
-.description {
-  padding-left: 1em;
-  padding-top: 1em;
+.form input[type="text"] {
+    width: 80%;
+    height: 30px;
+    padding: 0 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 10px;
 }
 
-input.text {
-  width: 100%;
-  height: 2em;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  padding-left: 1em;
+.form input[type="submit"] {
+    width: 80%;
+    height: 35px;
+    background-color: #333;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
 }
 
-input.btn {
-  background-color: rgb(173, 161, 146);
-  border-radius: 1em;
-  size: 1em;
-  display: inline-block;
-}
-.tex_code {
-  font-size: 0em;
+.form input[type="submit"]:hover {
+    background-color: #444;
 }
 
-.collapsible {
-  background-color: #777;
-  color: rgb(241, 226, 206);
-  cursor: pointer;
-  padding: 1em;
-  width: 100%;
-  border: none;
-  text-align: left;
-  outline: none;
-  font-size: 15px;
-  border-radius: 15px;
+.form label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 14px;
 }
-.active,
-.collapsible:hover {
-  background-color: #555;
+
+.form input[type="checkbox"] {
+    margin-right: 5px;
 }
+
+details {
+    margin-top: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+details summary {
+    font-weight: bold;
+    cursor: pointer;
+}
+
+body {
+    font-family: sans-serif;
+    color: #333;
+}
+
+.navbar {
+    background-color: #333;
+    color: #fff;
+}
+
+.navbar a {
+    color: #fff;
+}
+
+.navbar a:hover {
+    color: #ddd;
+}
+
+.navbar .active {
+    background-color: #444;
+}
+
+.navbar-brand {
+    font-weight: bold;
+}
+
+.navbar-toggler {
+    border-color: #ccc;
+}
+
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba(255,255,255, 1)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 8h24M4 16h24M4 24h24'/%3E%3C/svg%3E");
+}
+
+.navbar-nav {
+    margin-left: auto;
+}
+
+.nav-item {
+    margin-left: 20px;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.download-button {
+    background-color: #333;
+    color: #fff;
+    font-weight: bold;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+
+.download-button:hover {
+    background-color: #444;
+}
+
+
+.demos {
+    /* Add some spacing between the buttons */
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin: -8px;
+}
+
 .demo_btn {
-  background-color: #777;
-  color: rgb(241, 226, 206);
-  cursor: pointer;
-  padding: 1em;
-  width: 100%;
-  border: none;
-  text-align: left;
-  outline: none;
-  font-size: 15px;
-  border-radius: 15px;
+    /* Material design styling */
+    background: #fafafa;
+    border: 1px solid #e1e1e1;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+    color: #333;
+    font-size: 14px;
+    outline: none;
+    padding: 12px 24px;
+    transition: all 0.3s;
+
+    /* Center the LaTeX code inside the button */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    /* Add some spacing between the buttons */
+    margin: 8px;
 }
-.active,
+
 .demo_btn:hover {
-  background-color: #555;
+    /* Add some hover effects */
+    background: #eee;
+    cursor: pointer;
+}
+
+.resultspage {
+    /* Add some spacing between the elements */
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin: -8px;
 }
 
 .content {
-  padding: 0 18px;
-  display: none;
-  overflow: hidden;
-  background-color: rgb(201, 187, 170);
-  border-radius: 15px;
+    /* Material design styling */
+    background: #fafafa;
+    border: 1px solid #e1e1e1;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+    font-size: 14px;
+    outline: none;
+    padding: 16px;
+    transition: all 0.3s;
+
+    /* Add some spacing between the elements */
+    margin: 8px;
 }
 
-.svg_copy {
-  font-size: 0%;
-  width: 20px;
-  height: 20px;
-  margin-left: 10px;
-  margin-top: -5px;
+.latexField {
+    /* Add some styling to the LaTeX field */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
-input[type="submit"] {
-  height: 3em;
-  width: 7em;
+.download-button {
+    /* Material design styling for the download button */
+    background: #fafafa;
+    border: 1px solid #e1e1e1;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+    color: #333;
+    font-size: 14px;
+    outline: none;
+    padding: 8px 16px;
+    transition: all 0.3s;
+}
+
+.download-button:hover {
+    /* Add some hover effects */
+    background: #eee;
+    cursor: pointer;
+}
+
+.copy-button {
+    /* Material design styling for the copy button */
+    background: #fafafa;
+    border: 1px solid #e1e1e1;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+    color: #333;
+    font-size: 14px;
+    outline: none;
+    padding: 8px 16px;
+    transition: all 0.3s;
+}
+
+.copy-button:hover {
+    /* Add some hover effects */
+    background: #eee;
+    cursor: pointer;
+}
+
+pre {
+    /* Add some padding to the code blocks */
+    padding: 16px;
+    position: relative;
+}
+
+.scrollable {
+    /* Add some styling to the scrollable div */
+    overflow-x: auto;
 }
