@@ -1,0 +1,4 @@
+markupsafe
+flask
+sympy
+numpy
