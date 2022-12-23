@@ -1,6 +1,6 @@
 from markupsafe import escape
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
-from Error_minimal_for_web import Error_propagation, greek_letters, mathpix, Field, Demo, inline_rep
+from Error_minimal_for_web import Error_propagation, greek_letters, mathpix, Field, Demo, inline_rep, Ableiter
 app = Flask(__name__)
 
 
@@ -47,6 +47,17 @@ def page_index():
 @app.route('/demos')
 def page_demos():
     return render_template('demos.html', **params_demos)
+
+
+@app.route('/ableiter')
+def page_ableiter():
+    return render_template('ableiter.html')
+
+
+@app.route('/ableiter', methods=['POST'])
+def page_ableiter_post():
+    ableiter = Ableiter(request.form['expression'])
+    return render_template('ableiter.html', ableiter=ableiter)
 
 
 @app.route('/demos/<demo_name>')

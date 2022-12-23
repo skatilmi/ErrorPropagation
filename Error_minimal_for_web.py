@@ -224,3 +224,31 @@ class Error_propagation:
 
 def mathpix(expression):
     return '\['+expression+'\]'
+
+
+
+class Ableiter:
+    def __init__(self, expression) -> None:
+        self.f = sp.parse_expr(expression)
+        self.params = {}
+        self.params['f_raw'] = expression
+        self.params['f'] = mathpix(sp.latex(self.f))
+        self.params['free_symbols'] = [mathpix(sp.latex(i)) for i in self.f.free_symbols]
+        self.params['free_symbols_deriv'] = [
+            mathpix(sp.latex(
+                sp.diff(self.f, i)))
+            for i in self.f.free_symbols
+        ]
+        self.params['deriv_symbols'] = [
+
+            mathpix(r'\frac{\partial}{\partial '+sp.latex(i)+'}') for i in self.f.free_symbols
+        ]
+        self.params['free_symbols_deriv_raw'] = [
+            str(sp.latex(
+                sp.diff(self.f, i)))
+            for i in self.f.free_symbols
+        ]
+        self.params['deriv_symbols'] = [
+
+            mathpix(r'\frac{\partial}{\partial '+sp.latex(i)+'}') for i in self.f.free_symbols
+        ]

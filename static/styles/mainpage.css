@@ -29,6 +29,12 @@ body {
     background-color: #444;
 }
 
+.deriv-field {
+    display: flex;
+    flex-direction: row;
+}
+
+.raw-latex.invisible {}
 
 .content {
     border: 2px solid #333;

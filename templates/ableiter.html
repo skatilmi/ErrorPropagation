@@ -1,0 +1,61 @@
+{% extends "index.html" %} {% block title %}Home{% endblock %} {% block content
+%}
+
+<div class="description">
+
+
+    <br />
+    Ableiter
+    <style>
+        .form-description {
+            width: 100%;
+        }
+    </style>
+    <div class="form">
+        <form method="POST">
+            <div class="form-description">
+                <label>expression:</label>
+                <input type="text" name="expression" placeholder="a_0**2/cos(k_1/k_2)**4" />
+            </div>
+            <input type="submit" value="Submit" /><br />
+
+    </div>
+    </form>
+
+    {% if ableiter %}
+    {{ableiter.params.f}}
+    {% for symbol in ableiter.params.free_symbols %}
+    <div class="deriv-field content">
+
+        <div>
+            <button type="button" class="demo_btn copy" onclick="copyCode2(this)"><i class="fa fa-copy"
+                    style="font-size:36px;"></i></button>
+            <button type="button" class="demo_btn download" onclick="downloadSVGAsPNG2(this,5)"><i
+                    class="fa fa-download" style="font-size:36px;"></i></button>
+
+        </div>
+
+        <div>
+            <button type="button" class="demo_btn" onclick="">
+                {{ ableiter.params.deriv_symbols[loop.index-1] }}
+            </button>
+        </div>
+        <div class="render-latex">
+            <button type="button" class="demo_btn" onclick="downloadSVGAsPNG2(this,5)">
+                {{ ableiter.params.free_symbols_deriv[loop.index-1] }}
+            </button>
+        </div>
+        <div class="raw-latex">
+            <button type="button" class="demo_btn" onclick="copyCode2(this)">
+                {{ ableiter.params.free_symbols_deriv_raw[loop.index-1] }}
+            </button>
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+</div>
+
+
+{% endblock %}
+</div>
+div.deriv-field:nth-child(6) > div:nth-child(3) > button:nth-child(1) > mjx-container:nth-child(1) > svg:nth-child(1)
