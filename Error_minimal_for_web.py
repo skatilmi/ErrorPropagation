@@ -207,7 +207,19 @@ class Error_propagation:
         c: str = Code(sp.Symbol('xxx'), p).raw_code[1:-1]
 
         free_symbols: List[str] = [str(i).replace('\\', '').replace('Delta ', 'Delta_') for i in expression.free_symbols]
+        free_symbols.sort(key=lambda x: len(x), reverse=False)
+        e = []
 
+        for i in free_symbols:
+            if str(i) != function_name:
+                e.append(i)
+            else:
+                e.append(f'{function_name}_data')
+        free_symbols = e
+
+        if relative_to_f:
+            idx = c.find('*')
+            c = f'{c[:idx-1]}f_data{c[idx:]}'
         return warp_in_function_syntax(
             f'{delta}{function_name}', free_symbols, c)
 
