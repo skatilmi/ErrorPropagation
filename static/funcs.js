@@ -34,7 +34,69 @@ function downloadPNG(png) {
 
 function downloadSVGAsPNG(buttonElement, scale) {
     var svgElement = buttonElement.parentElement.querySelector('.renderLatex > mjx-container > svg');
-    console.log(svgElement);
+    _downloadSVGAsPNG(svgElement, buttonElement, scale);
+}
+
+
+function copyCode(el) {
+    //var codeElement = el.nextElementSibling;
+    var codeElement = el.previousElementSibling;
+    var textarea = document.createElement('textarea');
+    textarea.value = codeElement.textContent;
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textarea);
+}
+
+function downloadSVGAsPNG2(buttonElement, scale) {
+    var svgElement = buttonElement.parentElement.parentElement.querySelector('.render-latex > button:nth-child(1) > mjx-container > svg');
+    console.log(buttonElement.parentElement.parentElement)
+    _downloadSVGAsPNG(svgElement, buttonElement, scale);
+
+}
+
+function copyCode2(button) {
+    // Get the content of the button
+    var element = button.parentElement.parentElement.querySelector('.raw-latex > button');
+    var text = element.innerText;
+
+
+
+    // Create a temporary textarea element
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    document.body.appendChild(textarea);
+
+    // Select the text in the textarea
+    textarea.select();
+
+    // Copy the selected text to the clipboard
+    document.execCommand("copy");
+
+    // Remove the textarea element
+    document.body.removeChild(textarea);
+    const message = document.createElement("div");
+    message.innerText = "Copied to clipboard!";
+    message.style.position = "absolute";
+    message.style.top = "50%";
+    message.style.left = "50%";
+    message.style.transform = "translate(-50%, -50%)";
+    message.style.backgroundColor = "lightgray";
+    message.style.padding = "1em";
+    message.style.borderRadius = "5px";
+    message.style.boxShadow = "2px 2px 10px rgba(0, 0, 0, 0.1)";
+    document.body.appendChild(message);
+
+    // Remove the message after a few seconds
+    setTimeout(function () {
+        document.body.removeChild(message);
+    }, 2000);
+}
+
+
+
+function _downloadSVGAsPNG(svgElement, buttonElement, scale) {
 
     buttonElement.addEventListener('click', function () {
         var canvas = document.createElement('canvas');
@@ -59,3 +121,4 @@ function downloadSVGAsPNG(buttonElement, scale) {
         img.src = 'data:image/svg+xml;base64,' + btoa(svgElement.outerHTML);
     });
 }
+

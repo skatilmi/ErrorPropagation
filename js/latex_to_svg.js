@@ -40,7 +40,7 @@ function get_svg_code(target, expression) {
           });
         };
         mj2img(expression, function (output) {
-          console.log(output.svg);
+          // console.log(output.svg);
           return output.svg;
         });
       });

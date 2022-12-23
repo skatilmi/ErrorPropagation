@@ -95,8 +95,10 @@ class Error_propagation:
         self.relative_error = relative_error
         self.fields: List[Field] = []
 
-        self.params = {"f": mathpix(self.function_name+' = '+self._f), "f_raw": self.function_name+' = '+self._f,
-                       "f_raw_svg": mathpix(self.function_name+' = '+self._f).replace('\\', '\\\\')}
+        self.params: dict = {}
+        self.params['f'] = mathpix(f'{self.function_name} = {self._f}')
+        self.params['f_raw'] = f'{self.function_name} = {self._f}'
+        self.params['f_raw_svg'] = mathpix(f'{self.function_name} = {self._f}').replace('\\', '\\\\')
 
     def get_free_symbols_as_latex(self):
         a = ', '.join(list(map(sp.latex, self.f.free_symbols)))
@@ -128,28 +130,16 @@ class Error_propagation:
         self.err_simple_0 = self.F*sp.simplify(sp.sqrt(self.error_0/self.f**2))
         self._err2_simple = sp.latex(self.err_simple_0)
 
-    def collect_relative_error__(self, ppp):
-        arg = sp.simplify(ppp/self.f**2)
-        f = 0
-        for summand in arg.args:
-            for symbol in self.f.free_symbols:
-                if symbol in summand.free_symbols and sp.Symbol('\\Delta '+str(symbol)) in summand.free_symbols:
-                    f += summand*(sp.Symbol('\\Delta '+str(symbol)+'_\\%')
-                                  ** 2) * symbol**2/sp.Symbol('\\Delta '+str(symbol))**2
-        return self.F*sp.simplify(sp.sqrt(f))
-
     def collect_relative_error(self, ppp):
         arg = sp.simplify(ppp/self.f**2)
 
         f = arg
         for symbol in f.free_symbols:
-            f = f.subs(sp.Symbol('\\Delta '+str(symbol)) /
-                       symbol, sp.Symbol('\\Delta '+str(symbol)+'_\\%'))
+            f = f.subs(sp.Symbol('\\Delta '+str(symbol)), symbol, sp.Symbol('\\Delta '+str(symbol)+'_\\%'))
 
         f = arg
         for symbol in f.free_symbols:
-            f = f.subs(sp.Symbol('\\Delta '+str(symbol)), symbol *
-                       sp.Symbol('\\Delta '+str(symbol)+'_rel'))
+            f = f.subs(sp.Symbol('\\Delta '+str(symbol)), symbol * sp.Symbol('\\Delta '+str(symbol)+'_rel'))
 
         return self.F*sp.simplify(sp.sqrt(f))
 
@@ -177,16 +167,18 @@ class Error_propagation:
         self.fields += [
             Field(self.function_name+' = '+self._f,
                   self.gpr(self.f, nosqrt=True)),
-            Field(self.wrap_error(self._err1), self.gpr(self.error)),
+            Field(self.wrap_error(self._err1),
+                  self.gpr(self.error, delta=True)),
             Field(self.wrap_error(self._err1_simple),
-                  self.gpr(self.error_simple, delta=True)),
+                  self.gpr(self.error_simple, delta=True, relative_to_f=True)),
         ]
 
         if not self.substitution:
             return
 
         self.fields += [
-            Field(self.wrap_error(self._err2, zeros), self.gpr(self.error_0))
+            Field(self.wrap_error(self._err2, zeros),
+                  self.gpr(self.error_0, delta=True)),
         ]
 
     def wrap_error(self, expression, zeros=[]):
@@ -206,25 +198,26 @@ class Error_propagation:
     def gpr(self, *args, **kwargs):
         return self.get_python_represenaion(*args, **kwargs)
 
-    def get_python_represenaion(self, expression, nosqrt=False, delta=False):
+    def get_python_represenaion(self, expression, nosqrt=False, delta=False, relative_to_f=False):
+        delta = 'Delta_' if delta else ''
+        function_name = self.function_name
         if not nosqrt:
             expression = sp.sqrt(expression)
         p = str(expression).replace('\\', '').replace('Delta ', 'Delta_')
+        c: str = Code(sp.Symbol('xxx'), p).raw_code[1:-1]
 
-        c = Code(sp.Symbol('xxxxxxxxxxxxxxxxxxxxxx'), p).raw_code[1:-1]
-        free_symbols = ', '.join(list(map(str,
-                                          list(expression.free_symbols)
-                                          )
-                                      )
-                                 ).replace('\\', '').replace('Delta ', 'Delta_')
+        free_symbols: List[str] = [str(i).replace('\\', '').replace('Delta ', 'Delta_') for i in expression.free_symbols]
 
-        c = f'def {self.function_name}(*, {free_symbols}):\n  return {c}'
-        return c
+        return warp_in_function_syntax(
+            f'{delta}{function_name}', free_symbols, c)
 
 
 def mathpix(expression):
     return '\['+expression+'\]'
 
+
+def warp_in_function_syntax(function_name: str, keys: List[str], return_value: str) -> str:
+    return f'def {function_name}({", ".join(keys)}):\n  return {return_value}'
 
 
 class Ableiter:
