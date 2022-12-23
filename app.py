@@ -65,12 +65,12 @@ def page_demos_list(demo_name):
     return render_template('comm.html', coockie=Coockie(), fields=demo_fields)
 
 
-@app.route('/home')
+@app.route('/error')
 def page_home():
-    return render_template('home.html', **params_home)
+    return render_template('error.html', **params_home)
 
 
-@app.route('/home', methods=['POST'])
+@app.route('/error', methods=['POST'])
 def page_home_post():
     E = Error_propagation(
         request.form['expression'], get_relative_error_checkbox(), request.form['fname'])

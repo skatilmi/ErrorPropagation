@@ -15,6 +15,7 @@
 <script type="text/javascript" id="MathJax-script" async
   src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/mainpage.css') }}" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 <head>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -32,14 +33,18 @@
         aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
-      <a class="navbar-brand" href="/">Error Propagation</a>
+      <a class="navbar-brand" href="/">utilities</a>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
-          <li class="nav-item active">
-            <a class="nav-link" href="/home">Home <span class="sr-only">(current)</span></a>
+          <li class="nav-item ">
+            <!-- <a class="nav-link" href="/home">Error Propagation<span class="sr-only">(current)</span></a> -->
+            <a class="nav-link" href="/error">Error Propagation</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/demos">Demos</a>
+            <a class="nav-link" href="/demos">demos</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/ableiter">Ableiter</a>
           </li>
         </ul>
       </div>
@@ -47,28 +52,6 @@
   </nav>
 
 
-  <script>
-    function copyCode(el) {
-      // Get the code element
-      var codeElement = el.nextElementSibling;
-
-      // Create a new textarea element
-      var textarea = document.createElement('textarea');
-      // Set the value of the textarea to the text content of the code element
-      textarea.value = codeElement.textContent;
-      // Append the textarea to the document
-      document.body.appendChild(textarea);
-
-      // Select the text in the textarea
-      textarea.select();
-
-      // Copy the selected text to the clipboard
-      document.execCommand('copy');
-
-      // Remove the textarea from the document
-      document.body.removeChild(textarea);
-    }
-  </script>
   {% block content %} {% endblock %}
 
   <script>
