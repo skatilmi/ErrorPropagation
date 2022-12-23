@@ -55,30 +55,19 @@ class Code:
     def __init__(self, x_, f_):
         raw_code = inspect.getsource(
             sp.lambdify(x_, f_)).split('return')[-1]
-        raw_code = raw_code.replace('exp', 'np.exp')
-        raw_code = raw_code.replace('sqrt', 'np.sqrt')
+        replace = {
+            'exp': 'np.exp', 'sqrt': 'np.sqrt',
+            'sin': 'np.sin', 'cos': 'np.cos', 'tan': 'np.tan',
+            'sinc': 'np.sinc',
+            'atan': 'np.arctan', 'asin': 'np.arcsin', 'acos': 'np.arccos',
+            'tanh': 'np.tanh', 'sinh': 'np.sinh', 'cosh': 'np.cosh',
+            'log': 'np.log',
+            'abs': 'np.abs', 'max': 'np.max', 'min': 'np.min',
 
-        raw_code = raw_code.replace('sin', 'np.sin')
-        raw_code = raw_code.replace('cos', 'np.cos')
-        raw_code = raw_code.replace('tan', 'np.tan')
 
-        raw_code = raw_code.replace('sinc', 'np.sinc')
-
-        raw_code = raw_code.replace('atan', 'np.arctan')
-        raw_code = raw_code.replace('asin', 'np.arcsin')
-        raw_code = raw_code.replace('acos', 'np.arccos')
-
-        raw_code = raw_code.replace('tanh', 'np.tanh')
-        raw_code = raw_code.replace('sinh', 'np.sinh')
-        raw_code = raw_code.replace('cosh', 'np.cosh')
-
-        raw_code = raw_code.replace('log', 'np.log')
-
-        raw_code = raw_code.replace('abs', 'np.abs')
-        raw_code = raw_code.replace('max', 'np.max')
-        raw_code = raw_code.replace('min', 'np.min')
-        raw_code = raw_code.replace('sign', 'np.sign')
-
+        }
+        for k, v in replace.items():
+            raw_code = raw_code.replace(k, v)
         self.raw_code = raw_code
         self.t = sp.lambdify(x_, f_)
 
@@ -98,7 +87,8 @@ class Error_propagation:
         self.params: dict = {}
         self.params['f'] = mathpix(f'{self.function_name} = {self._f}')
         self.params['f_raw'] = f'{self.function_name} = {self._f}'
-        self.params['f_raw_svg'] = mathpix(f'{self.function_name} = {self._f}').replace('\\', '\\\\')
+        self.params['f_raw_svg'] = mathpix(
+            f'{self.function_name} = {self._f}').replace('\\', '\\\\')
 
     def get_free_symbols_as_latex(self):
         a = ', '.join(list(map(sp.latex, self.f.free_symbols)))
@@ -135,11 +125,13 @@ class Error_propagation:
 
         f = arg
         for symbol in f.free_symbols:
-            f = f.subs(sp.Symbol('\\Delta '+str(symbol)), symbol, sp.Symbol('\\Delta '+str(symbol)+'_\\%'))
+            f = f.subs(sp.Symbol('\\Delta '+str(symbol)), symbol,
+                       sp.Symbol('\\Delta '+str(symbol)+'_\\%'))
 
         f = arg
         for symbol in f.free_symbols:
-            f = f.subs(sp.Symbol('\\Delta '+str(symbol)), symbol * sp.Symbol('\\Delta '+str(symbol)+'_rel'))
+            f = f.subs(sp.Symbol('\\Delta '+str(symbol)), symbol *
+                       sp.Symbol('\\Delta '+str(symbol)+'_rel'))
 
         return self.F*sp.simplify(sp.sqrt(f))
 
@@ -204,8 +196,10 @@ class Error_propagation:
         p = str(expression).replace('\\', '').replace('Delta ', 'Delta_')
         c: str = Code(sp.Symbol('xxx'), p).raw_code[1:-1]
 
-        free_symbols: List[str] = [str(i).replace('\\', '').replace('Delta ', 'Delta_') for i in expression.free_symbols]
-        free_symbols = [i if str(i) != function_name else f'{function_name}_data' for i in free_symbols]
+        free_symbols: List[str] = [str(i).replace('\\', '').replace(
+            'Delta ', 'Delta_') for i in expression.free_symbols]
+        free_symbols = [i if str(
+            i) != function_name else f'{function_name}_data' for i in free_symbols]
         free_symbols.sort()
 
         if relative_to_f:
@@ -226,26 +220,49 @@ def warp_in_function_syntax(function_name: str, keys: List[str], return_value: s
 
 class Ableiter:
     def __init__(self, expression) -> None:
+        function_name = ''
+        if '=' in expression:
+            function_name, expression = expression.split('=')
         self.f = sp.parse_expr(expression)
         self.params = {}
         self.params['f_raw'] = expression
-        self.params['f'] = mathpix(sp.latex(self.f))
-        self.params['free_symbols'] = [mathpix(sp.latex(i)) for i in self.f.free_symbols]
+        if function_name:
+            self.params['f'] = mathpix(
+                sp.latex(function_name)+'='+sp.latex(self.f))
+            print(self.params['f'])
+            print(function_name)
+        else:
+            self.params['f'] = mathpix(sp.latex(self.f))
+
+        self.params['free_symbols'] = [
+            mathpix(sp.latex(i)) for i in self.f.free_symbols]
+
+        self.params['free_symbols_deriv_raw'] = []
+
+        for i in self.f.free_symbols:
+            to_append: str = str(sp.latex(sp.diff(self.f, i)))
+            if function_name:
+                to_append = r'\frac{\partial '+function_name + \
+                    r'}{\partial '+sp.latex(i)+'} = ' + to_append
+            self.params['free_symbols_deriv_raw'] += [to_append]
+
         self.params['free_symbols_deriv'] = [
-            mathpix(sp.latex(
-                sp.diff(self.f, i)))
-            for i in self.f.free_symbols
-        ]
+            mathpix(i) for i in self.params['free_symbols_deriv_raw']]
         self.params['deriv_symbols'] = [
+            mathpix(r'\frac{\partial '+function_name+r'}{\partial '+sp.latex(i)+'}') for i in self.f.free_symbols
+        ]
 
-            mathpix(r'\frac{\partial}{\partial '+sp.latex(i)+'}') for i in self.f.free_symbols
-        ]
-        self.params['free_symbols_deriv_raw'] = [
-            str(sp.latex(
-                sp.diff(self.f, i)))
-            for i in self.f.free_symbols
-        ]
-        self.params['deriv_symbols'] = [
 
-            mathpix(r'\frac{\partial}{\partial '+sp.latex(i)+'}') for i in self.f.free_symbols
-        ]
+class Renderer:
+    def __init__(self, expression_latex='', expression_python="") -> None:
+        self.expression_latex = expression_latex
+        self.expression_python = expression_python
+        self.params = {}
+        if expression_latex and not expression_python:
+            self.params['rendered'] = mathpix(expression_latex)
+        elif expression_python and not expression_latex:
+            latex = sp.latex(sp.parse_expr(expression_python.replace(
+                'np.', '').replace('math.', '').replace('sp.', '')))
+            self.params['rendered'] = mathpix(latex)
+        else:
+            self.params['rendered'] = mathpix(expression_latex)

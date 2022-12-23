@@ -15,11 +15,18 @@
         <form method="POST">
             <div class="form-description">
                 <label>expression:</label>
-                <input type="text" name="expression" placeholder="a_0**2/cos(k_1/k_2)**4" />
+                <textarea type="text" rows="4" cols="50" name="expression" id="input_expression"
+                    placeholder="a_0**2/cos(k_1/k_2)**4"></textarea>
             </div>
             <input type="submit" value="Submit" /><br />
 
     </div>
+    <script>
+        document.getElementById("input_expression").value = "{{request.form['expression']}}";
+        if (document.getElementById("input_expression").value == "") {
+            document.getElementById("input_expression").value = "a_0**2/cos(k_1/k_2)**4";
+        }
+    </script>
     </form>
 
     {% if ableiter %}

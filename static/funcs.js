@@ -55,6 +55,10 @@ function downloadSVGAsPNG2(buttonElement, scale) {
     _downloadSVGAsPNG(svgElement, buttonElement, scale);
 
 }
+function downloadSVGAsPNG3(buttonElement, scale) {
+    var svgElement = buttonElement.parentElement.parentElement.querySelector('.renderer_area > button > mjx-container > svg');
+    _downloadSVGAsPNG(svgElement, buttonElement, scale);
+}
 
 function copyCode2(button) {
     // Get the content of the button

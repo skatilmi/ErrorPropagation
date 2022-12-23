@@ -1,0 +1,48 @@
+{% extends "index.html" %} {% block title %}Home{% endblock %} {% block content
+%}
+
+<div class="description">
+
+
+  Renderer
+
+  <div class="form">
+    <form method="POST">
+
+
+      <div class="fromdescription">
+        <label>Expression LaTeX:</label>
+        <textarea type="text" rows="4" cols="50" name="expression_latex" id="expression_latex"></textarea><br />
+
+      </div>
+
+      <div class="fromdescription">
+        <label>Expression Python:</label>
+        <textarea type="text" rows="4" cols="50" name="expression_python" id="expression_python"></textarea><br />
+      </div>
+      <input type="submit" value="Submit" /><br />
+
+    </form>
+    <script>
+      document.getElementById("expression_python").value = "{{request.form['expression_python']}}";
+      document.getElementById("expression_latex").value = "{{request.form['expression_latex']}}";
+    </script>
+    <div>
+      <!-- area to display the rendered latex code -->
+      {% if renderer %}
+      <div class="renderer_area">
+        <button type="button" class="demo_btn">{{renderer.params.rendered}}</button>
+
+        <div class="save_area">
+          <button type="button" class="demo_btn" onclick="downloadSVGAsPNG3(this,5)">png</button>
+          <button type="button" class="demo_btn" disabled="true" onclick="copyCode3(this)">copy LaTeX</button>
+          <button type="button" class="demo_btn" disabled="true" onclick="copyCode3(this)">copy python</button>
+
+        </div>
+      </div>
+
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

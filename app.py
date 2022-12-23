@@ -1,6 +1,6 @@
 from markupsafe import escape
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
-from Error_minimal_for_web import Error_propagation, greek_letters, mathpix, Field, Demo, inline_rep, Ableiter
+from Error_minimal_for_web import Error_propagation, greek_letters, mathpix, Field, Demo, inline_rep, Ableiter, Renderer
 app = Flask(__name__)
 
 
@@ -60,7 +60,21 @@ def page_ableiter_post():
     return render_template('ableiter.html', ableiter=ableiter)
 
 
-@app.route('/demos/<demo_name>')
+@app.route('/renderer')
+def page_renderer():
+    return render_template('renderer.html')
+
+
+@app.route('/renderer', methods=['POST'])
+def page_renderer_post():
+    expression_python = request.form['expression_python']
+    expression_latex = request.form['expression_latex']
+    renderer = Renderer(expression_python=expression_python,
+                        expression_latex=expression_latex)
+    return render_template('renderer.html', renderer=renderer)
+
+
+@ app.route('/demos/<demo_name>')
 def page_demos_list(demo_name):
     for demo in demo_fields:
         print(demo.demo_name)
@@ -76,12 +90,12 @@ def page_demos_list(demo_name):
     return render_template('comm.html', coockie=Coockie(), fields=demo_fields)
 
 
-@app.route('/error')
+@ app.route('/error')
 def page_home():
     return render_template('error.html', **params_home)
 
 
-@app.route('/error', methods=['POST'])
+@ app.route('/error', methods=['POST'])
 def page_home_post():
     E = Error_propagation(
         request.form['expression'], get_relative_error_checkbox(), request.form['fname'])
@@ -110,5 +124,5 @@ def get_relative_error_checkbox():
 
 
 if __name__ == '__main__':
-    #app.run(host='192.168.178.125', port=5000)
-    app.run(host='0.0.0.0')
+    # app.run(host='192.168.178.125', port=5000)
+    app.run(host='0.0.0.0', debug=True)

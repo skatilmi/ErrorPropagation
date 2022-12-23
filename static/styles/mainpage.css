@@ -66,6 +66,14 @@ body {
     margin-bottom: 10px;
 }
 
+.form textarea[type="text"] {
+    width: 80%;
+    padding: 0 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
 .form input[type="submit"] {
     width: 80%;
     height: 35px;
