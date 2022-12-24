@@ -34,10 +34,18 @@ def inline_rep(expression):
 
 
 class Field:
-    def __init__(self, latex_code, python_code=False):
+    def __init__(self, latex_code=False, python_code=False):
+        if latex_code is False:
+            latex_code = sp.latex(sp.parse_expr(str(python_code)))
+
         self.latex_code_mathpix = mathpix(latex_code)
         self.latex_code_raw = latex_code
+
         self.python_code = python_code
+        if '=' in str(python_code):
+            print(python_code)
+            #self.python_code = python_code.split('=')[-1]
+
         self.editable = False
 
 
@@ -71,6 +79,30 @@ class Code:
         self.raw_code = raw_code
         self.t = sp.lambdify(x_, f_)
 
+    @staticmethod
+    def replace(x):
+        x = str(x)
+        _replace = {
+            'exp': 'np.exp', 'sqrt': 'np.sqrt',
+            'sin': 'np.sin', 'cos': 'np.cos', 'tan': 'np.tan',
+            'sinc': 'np.sinc',
+            'atan': 'np.arctan', 'asin': 'np.arcsin', 'acos': 'np.arccos',
+            'tanh': 'np.tanh', 'sinh': 'np.sinh', 'cosh': 'np.cosh',
+            'log': 'np.log',
+            'abs': 'np.abs', 'max': 'np.max', 'min': 'np.min',
+
+
+        }
+        for k, v in _replace.items():
+            x = x.replace(k, v)
+        return x
+
+
+class Expression:
+    def __init__(self, sympy_expression):
+        self.sympy = sympy_expression
+        self.latex = sp.latex(sp.parse_expr(str(sympy_expression)))
+
 
 class Error_propagation:
     def __init__(self, func, relative_error=False, function_name='f'):
@@ -78,7 +110,8 @@ class Error_propagation:
         self.func = func
         self.F = sp.Symbol(self.function_name)
         self.F_err = sp.Symbol('\Delta '+self.function_name)
-        self.f = sp.parse_expr(self.func)
+        self.f: sp.Expr = sp.parse_expr(self.func)
+        self.f_free_symbols = self.f.free_symbols
         self._f = sp.latex(self.f)
         self.substitution = False
         self.relative_error = relative_error
@@ -94,11 +127,10 @@ class Error_propagation:
         a = ', '.join(list(map(sp.latex, self.f.free_symbols)))
         return mathpix(a)
 
-    def k(self, symbol: str, f_: sp.Expr):
+    def derivate_and_square(self, symbol: str, f_: sp.Expr):
         s = sp.Symbol(symbol)
-        delta = sp.Symbol('\\Delta '+symbol)
-        if symbol in greek_letters:
-            delta = sp.Symbol('\\Delta '+'\\'+symbol)
+        delta = sp.Symbol(
+            '\\Delta '+symbol) if symbol not in greek_letters else sp.Symbol('\\Delta '+'\\'+symbol)
         a = sp.diff(f_, s) * delta
         a = a**2
         return a
@@ -125,19 +157,14 @@ class Error_propagation:
 
         f = arg
         for symbol in f.free_symbols:
-            f = f.subs(sp.Symbol('\\Delta '+str(symbol)), symbol,
-                       sp.Symbol('\\Delta '+str(symbol)+'_\\%'))
-
-        f = arg
-        for symbol in f.free_symbols:
             f = f.subs(sp.Symbol('\\Delta '+str(symbol)), symbol *
                        sp.Symbol('\\Delta '+str(symbol)+'_rel'))
 
         return self.F*sp.simplify(sp.sqrt(f))
 
     def do_error(self):
-        self.error = sum(self.k(i, self.f)
-                         for i in list(map(str, self.f.free_symbols)))
+        self.error = sum(self.derivate_and_square(i, self.f)
+                         for i in list(map(str, self.f_free_symbols)))
         self._err1 = sp.latex(sp.sqrt(self.error))
 
         if self.relative_error:
@@ -149,13 +176,13 @@ class Error_propagation:
         self.error_simple = self.F*sp.simplify(sp.sqrt(self.error/self.f**2))
         self._err1_simple = sp.latex(self.error_simple)
 
-    def get_errors(self):
-        errors = [self._err1, self._err1_simple]
-        if self.substitution:
-            errors.extend([self._err2, self._err2_simple])
-        return errors
+        # normal error
+        #self.ex_error_1 = Expression(sum(self.derivate_and_square(i, self.f) for i in list(map(str, self.f_free_symbols))))
+        # error with relative to f
+        #self.ex_error_2 = Expression(self.F*sp.simplify(sp.sqrt(self.error_1.sympy/self.f**2)))
+        # error with relative paramter errors
 
-    def set_html_codes(self, zeros=[]):
+    def set_fields(self, zeros=[]):
         self.fields += [
             Field(self.function_name+' = '+self._f,
                   self.gpr(self.f, nosqrt=True)),
@@ -219,38 +246,29 @@ def warp_in_function_syntax(function_name: str, keys: List[str], return_value: s
 
 
 class Ableiter:
-    def __init__(self, expression) -> None:
+    def __init__(self, expression: str) -> None:
         function_name = ''
         if '=' in expression:
             function_name, expression = expression.split('=')
-        self.f = sp.parse_expr(expression)
+        self.f = sp.parse_expr(expression.replace(
+            'np.', '').replace('math.', '').replace('sp.', ''))
         self.params = {}
         self.params['f_raw'] = expression
-        if function_name:
-            self.params['f'] = mathpix(
-                sp.latex(function_name)+'='+sp.latex(self.f))
-            print(self.params['f'])
-            print(function_name)
-        else:
-            self.params['f'] = mathpix(sp.latex(self.f))
-
-        self.params['free_symbols'] = [
-            mathpix(sp.latex(i)) for i in self.f.free_symbols]
-
+        self.params['input_function'] = self.f
         self.params['free_symbols_deriv_raw'] = []
+        self.params['derivatives_python'] = []
 
+        fname = function_name if function_name else 'f'
         for i in self.f.free_symbols:
             to_append: str = str(sp.latex(sp.diff(self.f, i)))
-            if function_name:
-                to_append = r'\frac{\partial '+function_name + \
-                    r'}{\partial '+sp.latex(i)+'} = ' + to_append
+            self.params['derivatives_python'] += [str(sp.diff(self.f, i))]
+
+            to_append = r'\frac{\partial '+fname + \
+                r'}{\partial '+sp.latex(i)+'} = ' + to_append
             self.params['free_symbols_deriv_raw'] += [to_append]
 
-        self.params['free_symbols_deriv'] = [
-            mathpix(i) for i in self.params['free_symbols_deriv_raw']]
-        self.params['deriv_symbols'] = [
-            mathpix(r'\frac{\partial '+function_name+r'}{\partial '+sp.latex(i)+'}') for i in self.f.free_symbols
-        ]
+        self.params['derivatives_python_as_function'] = [
+            Code.replace(i) for i in self.params['derivatives_python']]
 
 
 class Renderer:
@@ -259,10 +277,11 @@ class Renderer:
         self.expression_python = expression_python
         self.params = {}
         if expression_latex and not expression_python:
+            self.latex = expression_latex
             self.params['rendered'] = mathpix(expression_latex)
         elif expression_python and not expression_latex:
-            latex = sp.latex(sp.parse_expr(expression_python.replace(
+            self.latex = sp.latex(sp.parse_expr(expression_python.replace(
                 'np.', '').replace('math.', '').replace('sp.', '')))
-            self.params['rendered'] = mathpix(latex)
+            self.params['rendered'] = mathpix(self.latex)
         else:
             self.params['rendered'] = mathpix(expression_latex)

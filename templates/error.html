@@ -26,13 +26,13 @@
     <form method="POST">
       <div class="fromdescription">
         <label>function name:</label><br />
-        <input type="text" name="fname" value="{{ coockie.fname }}" placeholder="f" /><br />
+        <textarea type="text" rows="2" cols="50" name="fname" id="fname"></textarea><br />
       </div>
 
       <div class="fromdescription">
         <label>expression:</label><br />
-        <input type="text" name="expression" placeholder="a_0**2/cos(k_1/k_2)**4"
-          value="a_0**2/cos(k_1/k_2)**4" /><br />
+        <textarea type="text" rows="2" cols="50" name="expression" id="expression"></textarea><br />
+
       </div>
 
       <div class="fromdescription">
@@ -48,5 +48,20 @@
       </div>
     </form>
   </div>
+  <script>
+    document.getElementById("fname").value = "{{request.form['fname']}}";
+    document.getElementById("expression").value = "{{request.form['expression']}}";
+    if (document.getElementById("expression").value == "") {
+      document.getElementById("expression").value = "a_0**2/cos(k_1/k_2)**4";
+    }
+
+    if (document.getElementById("fname").value == "") {
+      document.getElementById("fname").value = "f";
+    }
+
+
+
+  </script>
+
   {% endblock %}
 </div>

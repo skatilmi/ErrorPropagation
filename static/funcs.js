@@ -98,6 +98,21 @@ function copyCode2(button) {
     }, 2000);
 }
 
+function copyCodeNew(button, idx) {
+    // the text to copy is in the same div as the button from class "invizible"
+    // there are "invizible" divs, we choose the one with the same index as the button
+    var element = button.parentElement.parentElement.querySelectorAll('.invizible')[idx];
+    console.log(element);
+    var text = element.innerText;
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand("copy");
+    document.body.removeChild(textarea);
+
+
+}
 
 
 function _downloadSVGAsPNG(svgElement, buttonElement, scale) {

@@ -3,33 +3,9 @@
 
 <div class="resultspage">
   {% for field in fields %}
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/canvg/1.5/canvg.min.js"></script>
-
-
-  <div class="content">
-
-    <div class="latexField">
-      <div class="box content">
-
-        <div class="renderLatex">{{ field.latex_code_mathpix }}</div>
-        <button type="button" class="download-button" onclick="downloadSVGAsPNG(this, 5)">PNG (double-click)</button>
-        <!-- <button type="button" class="copy-button" onclick="copyCode(this)">Copy</button> -->
-        <!-- <button type="button" class="copy-button" onclick="copyCode(this)">Copy</button> -->
-
-      </div>
-    </div>
-    <!-- {% if field.python_code %} -->
-    <div class="box content scrollable">
-      <pre><code class="tex_code">{{field.latex_code_raw}}</code></pre>
-      <button type="button" class="copy-button" onclick="copyCode(this)">Copy</button>
-    </div>
-
-    <div class="box content scrollable">
-      <pre><code class="python scrollable">{{field.python_code}}</code></pre>
-      <button type="button" class="copy-button" onclick="copyCode(this)">Copy</button>
-    </div>
-    <!-- {% endif %} -->
-  </div>
+  {% with field=field %}
+  {% include "latex_copyable.html" %}
+  {% endwith %}
   {% endfor %}
 </div>
 

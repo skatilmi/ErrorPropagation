@@ -34,7 +34,12 @@ body {
     flex-direction: row;
 }
 
-.raw-latex.invisible {}
+.invizible {
+    opacity: 0;
+    pointer-events: none;
+    width: 0;
+    height: 0;
+}
 
 .content {
     border: 2px solid #333;

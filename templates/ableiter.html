@@ -29,36 +29,15 @@
     </script>
     </form>
 
-    {% if ableiter %}
-    {{ableiter.params.f}}
-    {% for symbol in ableiter.params.free_symbols %}
-    <div class="deriv-field content">
+    {% if fields %}
 
-        <div>
-            <button type="button" class="demo_btn copy" onclick="copyCode2(this)"><i class="fa fa-copy"
-                    style="font-size:36px;"></i></button>
-            <button type="button" class="demo_btn download" onclick="downloadSVGAsPNG2(this,5)"><i
-                    class="fa fa-download" style="font-size:36px;"></i></button>
-
-        </div>
-
-        <div>
-            <button type="button" class="demo_btn" onclick="">
-                {{ ableiter.params.deriv_symbols[loop.index-1] }}
-            </button>
-        </div>
-        <div class="render-latex">
-            <button type="button" class="demo_btn" onclick="downloadSVGAsPNG2(this,5)">
-                {{ ableiter.params.free_symbols_deriv[loop.index-1] }}
-            </button>
-        </div>
-        <div class="raw-latex">
-            <button type="button" class="demo_btn" onclick="copyCode2(this)">
-                {{ ableiter.params.free_symbols_deriv_raw[loop.index-1] }}
-            </button>
-        </div>
-    </div>
+    {% for field in fields %}
+    {% with field=field %}
+    {% include "latex_copyable.html" %}
+    {% endwith %}
     {% endfor %}
+
+
     {% endif %}
 </div>
 

@@ -29,16 +29,11 @@
     </script>
     <div>
       <!-- area to display the rendered latex code -->
-      {% if renderer %}
+      {% if field %}
       <div class="renderer_area">
-        <button type="button" class="demo_btn">{{renderer.params.rendered}}</button>
-
-        <div class="save_area">
-          <button type="button" class="demo_btn" onclick="downloadSVGAsPNG3(this,5)">png</button>
-          <button type="button" class="demo_btn" disabled="true" onclick="copyCode3(this)">copy LaTeX</button>
-          <button type="button" class="demo_btn" disabled="true" onclick="copyCode3(this)">copy python</button>
-
-        </div>
+        {% with field=field %}
+        {% include "latex_copyable.html" %}
+        {% endwith %}
       </div>
 
       {% endif %}

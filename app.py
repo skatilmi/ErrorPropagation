@@ -26,14 +26,7 @@ demo_fields = [
 ]
 
 
-class Coockie:
-    def __init__(self) -> None:
-        self.fname = 'f'
-        self.expression = 'a*x**2'
-        self.zeros = 'a'
-
-
-params_home = {"coockie": Coockie(), "greek_letters": mathpix(
+params_home = {"greek_letters": mathpix(
     ', '.join(['\\'+i for i in greek_letters]))}
 
 params_demos = {"fields": demo_fields}
@@ -44,34 +37,36 @@ def page_index():
     return render_template('index.html')
 
 
-@app.route('/demos')
-def page_demos():
-    return render_template('demos.html', **params_demos)
-
-
-@app.route('/ableiter')
+@app.route('/ableiter', methods=['POST', 'GET'])
 def page_ableiter():
-    return render_template('ableiter.html')
-
-
-@app.route('/ableiter', methods=['POST'])
-def page_ableiter_post():
+    if request.method == 'GET':
+        return render_template('ableiter.html')
     ableiter = Ableiter(request.form['expression'])
-    return render_template('ableiter.html', ableiter=ableiter)
+    fields = [Field(False, ableiter.params['input_function'])]
+    for latex, python in zip(ableiter.params['free_symbols_deriv_raw'], ableiter.params['derivatives_python_as_function']):
+        fields.append(Field(latex_code=latex, python_code=python))
+    return render_template('ableiter.html', fields=fields)
 
 
-@app.route('/renderer')
+@app.route('/renderer', methods=['POST', 'GET'])
 def page_renderer():
-    return render_template('renderer.html')
-
-
-@app.route('/renderer', methods=['POST'])
-def page_renderer_post():
-    expression_python = request.form['expression_python']
+    if request.method == 'GET':
+        return render_template('renderer.html')
+    expression_python = request.form['expression_python'].replace(
+        'np.', '').replace('math.', '').replace('sp.', '')
     expression_latex = request.form['expression_latex']
     renderer = Renderer(expression_python=expression_python,
                         expression_latex=expression_latex)
-    return render_template('renderer.html', renderer=renderer)
+    field = Field(expression_latex, expression_python)
+    field.latex_code_raw = renderer.latex
+    field.latex_code_mathpix = renderer.params['rendered']
+
+    return render_template('renderer.html', field=field)
+
+
+@app.route('/demos')
+def page_demos():
+    return render_template('demos.html', **params_demos)
 
 
 @ app.route('/demos/<demo_name>')
@@ -84,19 +79,15 @@ def page_demos_list(demo_name):
             E.do_error()
             zeros = []
             E.set_error_to_zero(zeros)
-            a = E.get_errors()
-            E.set_html_codes(zeros)
-            return render_template('comm.html', coockie=Coockie(), fields=E.fields)
-    return render_template('comm.html', coockie=Coockie(), fields=demo_fields)
+            E.set_fields(zeros)
+            return render_template('comm.html', fields=E.fields)
+    return render_template('comm.html', fields=demo_fields)
 
 
-@ app.route('/error')
-def page_home():
-    return render_template('error.html', **params_home)
-
-
-@ app.route('/error', methods=['POST'])
-def page_home_post():
+@ app.route('/error', methods=['POST', 'GET'])
+def page_error():
+    if request.method == 'GET':
+        return render_template('error.html', **params_home)
     E = Error_propagation(
         request.form['expression'], get_relative_error_checkbox(), request.form['fname'])
     E.do_error()
@@ -104,15 +95,8 @@ def page_home_post():
     if request.form['zeros'] != '':
         zeros = list(request.form['zeros'].split(','))
         E.set_error_to_zero(zeros)
-    a = E.get_errors()
-    E.set_html_codes(zeros)
-    return render_template('comm.html', coockie=Coockie(), fields=E.fields)
-
-
-@app.route('/user/<username>')
-def show_user_profile(username):
-    # show the user profile for that user
-    return f'User {username}'
+    E.set_fields(zeros)
+    return render_template('comm.html',  fields=E.fields)
 
 
 def get_relative_error_checkbox():
