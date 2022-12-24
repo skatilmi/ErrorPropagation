@@ -33,18 +33,37 @@ def inline_rep(expression):
     return sp.latex(sp.parse_expr(expression))
 
 
+def mathpix(expression):
+    return '\['+expression+'\]'
+
+
+def warp_in_function_syntax(function_name: str, keys: List[str], return_value: str) -> str:
+    return f'def {function_name}({", ".join(keys)}):\n  return {return_value}'
+
+
 class Field:
-    def __init__(self, latex_code=False, python_code=False):
+    def __init__(self, latex_code=False, python_code=False, as_function=False, fname='', description=''):
+        if latex_code is False and python_code is False:
+            return
         if latex_code is False:
-            latex_code = sp.latex(sp.parse_expr(str(python_code)))
+            if fname:
+                latex_code = latex_gleichung(sp.parse_expr(fname), sp.parse_expr(str(python_code)))
+            else:
+                latex_code = sp.latex(sp.parse_expr(str(python_code)))
 
         self.latex_code_mathpix = mathpix(latex_code)
         self.latex_code_raw = latex_code
+        self.description = description
 
         self.python_code = python_code
         if '=' in str(python_code):
             print(python_code)
-            #self.python_code = python_code.split('=')[-1]
+            self.python_code = python_code.split('=')[-1]
+            print(self.python_code)
+        if as_function:
+            if '=' in latex_code:
+                print('ok')
+        # get_python_representation(python_code, fname, delta=True)
 
         self.editable = False
 
@@ -83,13 +102,22 @@ class Code:
     def replace(x):
         x = str(x)
         _replace = {
-            'exp': 'np.exp', 'sqrt': 'np.sqrt',
-            'sin': 'np.sin', 'cos': 'np.cos', 'tan': 'np.tan',
+            'exp': 'np.exp',
+            'sqrt': 'np.sqrt',
+            'sin': 'np.sin',
+            'cos': 'np.cos',
+            'tan': 'np.tan',
             'sinc': 'np.sinc',
-            'atan': 'np.arctan', 'asin': 'np.arcsin', 'acos': 'np.arccos',
-            'tanh': 'np.tanh', 'sinh': 'np.sinh', 'cosh': 'np.cosh',
+            'atan': 'np.arctan',
+            'asin': 'np.arcsin',
+            'acos': 'np.arccos',
+            'tanh': 'np.tanh',
+            'sinh': 'np.sinh',
+            'cosh': 'np.cosh',
             'log': 'np.log',
-            'abs': 'np.abs', 'max': 'np.max', 'min': 'np.min',
+            'abs': 'np.abs',
+            'max': 'np.max',
+            'min': 'np.min',
 
 
         }
@@ -104,145 +132,93 @@ class Expression:
         self.latex = sp.latex(sp.parse_expr(str(sympy_expression)))
 
 
-class Error_propagation:
-    def __init__(self, func, relative_error=False, function_name='f'):
-        self.function_name = function_name
-        self.func = func
-        self.F = sp.Symbol(self.function_name)
-        self.F_err = sp.Symbol('\Delta '+self.function_name)
-        self.f: sp.Expr = sp.parse_expr(self.func)
-        self.f_free_symbols = self.f.free_symbols
-        self._f = sp.latex(self.f)
-        self.substitution = False
-        self.relative_error = relative_error
+def latex_gleichung(lhs: sp.Expr, rhs: sp.Expr):
+    return f"{sp.latex(lhs)} = {sp.latex(rhs)}"
+
+
+def get_python_representation(expression, function_name, delta=False, relative_to_f=False):
+    delta = 'Delta_' if delta else ''
+    p = str(expression).replace('\\', '').replace('Delta ', 'Delta_')
+    c: str = Code(sp.Symbol('xxx'), p).raw_code[1:-1]
+
+    free_symbols: List[str] = [str(i).replace('\\', '').replace(
+        'Delta ', 'Delta_') for i in expression.free_symbols]
+    free_symbols = [i if str(
+        i) != function_name else f'{function_name}_data' for i in free_symbols]
+    free_symbols.sort()
+
+    if relative_to_f:
+        idx = c.find(function_name)
+        c = f'{c[:idx]}{function_name}_data{c[idx+1:]}'
+
+    return warp_in_function_syntax(
+        f'{delta}{function_name}', free_symbols, c)
+
+
+class Error_Propagation:
+    def __init__(self, form) -> None:
+        self.form = form
+        self.zeros = [] if self.form['zeros'] == '' else [i.strip() for i in self.form['zeros'].split(',')]
+        self.relative_error_checkbox = self.form['relative_error'] == 'on'
         self.fields: List[Field] = []
+        self.input_expression = self.form['expression']
+        self.input_function_sympy = sp.parse_expr(self.input_expression)
+        self.free_symbols = self.input_function_sympy.free_symbols
+        self.free_symbols = {i for i in self.free_symbols if str(i) not in self.zeros}
 
-        self.params: dict = {}
-        self.params['f'] = mathpix(f'{self.function_name} = {self._f}')
-        self.params['f_raw'] = f'{self.function_name} = {self._f}'
-        self.params['f_raw_svg'] = mathpix(
-            f'{self.function_name} = {self._f}').replace('\\', '\\\\')
+        self.input_function_name_sympy = sp.parse_expr(self.form['fname'])
+        self.input_function_name = self.form['fname']
+        self._deriv_cells = []
+        self._deriv_cells_over_f = []
+        self._deriv_cells_relative = []
 
-    def get_free_symbols_as_latex(self):
-        a = ', '.join(list(map(sp.latex, self.f.free_symbols)))
-        return mathpix(a)
+        # self.field_error_zeros: Field = Field()
+        self.fields.append(self.feed_field_input_function())
+        self.fields.append(self.feed_field_error())
+        self.fields.append(self.feed_field_error_relative_f())
+        if self.relative_error_checkbox:
+            self.fields.append(self.feed_field_error_relative_params())
 
-    def derivate_and_square(self, symbol: str, f_: sp.Expr):
-        s = sp.Symbol(symbol)
-        delta = sp.Symbol(
-            '\\Delta '+symbol) if symbol not in greek_letters else sp.Symbol('\\Delta '+'\\'+symbol)
-        a = sp.diff(f_, s) * delta
-        a = a**2
-        return a
+    def feed_field_input_function(self):
+        latex_expression = latex_gleichung(sp.parse_expr(self.input_function_name), sp.parse_expr(self.input_expression))
+        return Field(latex_code=latex_expression, python_code=get_python_representation(self.input_function_sympy, self.input_function_name,  delta=False))
 
-    def set_error_to_zero(self, params: List[str]):
-        self.substitution = True
-        p = self.error
-        for param in params:
-            var = '\\Delta '+param
-            p = p.subs(var, 0)
+    def feed_field_error(self):
+        sqrt_sum_squared_errors = sp.sqrt(sum(sp.simplify(i**2) for i in self.deriv_cells))
+        latex_expression = latex_gleichung(sp.Symbol('\\Delta '+self.input_function_name), sqrt_sum_squared_errors)
+        return Field(latex_code=latex_expression, python_code=get_python_representation(sqrt_sum_squared_errors, self.input_function_name, delta=True))
 
-        self.error_0 = p
-        self._err2 = sp.latex(sp.sqrt(self.error_0))
+    def feed_field_error_relative_f(self):
+        sqrt_sum_squared_errors = self.input_function_name_sympy * sp.sqrt(sum(sp.simplify(i**2) for i in self.deriv_cells_over_f))
+        latex_expression = latex_gleichung(sp.Symbol('\\Delta '+self.input_function_name), sqrt_sum_squared_errors)
+        return Field(latex_code=latex_expression, python_code=get_python_representation(sqrt_sum_squared_errors, self.input_function_name, relative_to_f=True, delta=True))
 
-        if self.relative_error:
-            self.err_rel = self.collect_relative_error(self.error_0)
-            self._err2_simple = sp.latex(self.err_rel)
-            return
-        self.err_simple_0 = self.F*sp.simplify(sp.sqrt(self.error_0/self.f**2))
-        self._err2_simple = sp.latex(self.err_simple_0)
+    def feed_field_error_relative_params(self):
+        sqrt_sum_squared_errors = self.input_function_name_sympy * sp.sqrt(sum(sp.simplify(i**2) for i in self.deriv_cells_relative))
+        latex_expression = latex_gleichung(sp.Symbol('\\Delta '+self.input_function_name), sqrt_sum_squared_errors)
+        return Field(latex_code=latex_expression)
 
-    def collect_relative_error(self, ppp):
-        arg = sp.simplify(ppp/self.f**2)
+    def derivate(self, symbol: str, f_: sp.Expr):
+        return sp.diff(f_, sp.Symbol(symbol)) * sp.Symbol('\\Delta '+symbol) if symbol not in greek_letters else sp.Symbol('\\Delta '+'\\'+symbol)
 
-        f = arg
-        for symbol in f.free_symbols:
-            f = f.subs(sp.Symbol('\\Delta '+str(symbol)), symbol *
-                       sp.Symbol('\\Delta '+str(symbol)+'_rel'))
+    @property
+    def deriv_cells(self):
+        if not self._deriv_cells:
+            self._deriv_cells = [self.derivate(str(i), self.input_function_sympy) for i in self.free_symbols]
+        return self._deriv_cells
 
-        return self.F*sp.simplify(sp.sqrt(f))
+    @property
+    def deriv_cells_over_f(self):
+        if not self._deriv_cells_over_f:
+            self._deriv_cells_over_f = [i/self.input_function_sympy for i in self.deriv_cells]
+        return self._deriv_cells_over_f
 
-    def do_error(self):
-        self.error = sum(self.derivate_and_square(i, self.f)
-                         for i in list(map(str, self.f_free_symbols)))
-        self._err1 = sp.latex(sp.sqrt(self.error))
-
-        if self.relative_error:
-            self.err_simple = self.F*sp.simplify(sp.sqrt(self.error/self.f**2))
-            err_rel = self.collect_relative_error(self.error)
-            self._err1_simple = sp.latex(err_rel)
-            return
-
-        self.error_simple = self.F*sp.simplify(sp.sqrt(self.error/self.f**2))
-        self._err1_simple = sp.latex(self.error_simple)
-
-        # normal error
-        #self.ex_error_1 = Expression(sum(self.derivate_and_square(i, self.f) for i in list(map(str, self.f_free_symbols))))
-        # error with relative to f
-        #self.ex_error_2 = Expression(self.F*sp.simplify(sp.sqrt(self.error_1.sympy/self.f**2)))
-        # error with relative paramter errors
-
-    def set_fields(self, zeros=[]):
-        self.fields += [
-            Field(self.function_name+' = '+self._f,
-                  self.gpr(self.f, nosqrt=True)),
-            Field(self.wrap_error(self._err1),
-                  self.gpr(self.error, delta=True)),
-            Field(self.wrap_error(self._err1_simple),
-                  self.gpr(self.error_simple, delta=True, relative_to_f=True)),
-        ]
-
-        if not self.substitution:
-            return
-
-        self.fields += [
-            Field(self.wrap_error(self._err2, zeros),
-                  self.gpr(self.error_0, delta=True)),
-        ]
-
-    def wrap_error(self, expression, zeros=[]):
-        new = []
-        for i in zeros:
-            if i in greek_letters:
-                new.append('\\'+i)
-            else:
-                new.append(i)
-        zeros = new
-
-        tail = '\Big|_{' + ', '.join(['\Delta '+i for i in zeros])+'=0}'
-        if not zeros:
-            tail = ''
-        return '\Delta '+self.function_name+tail+' = '+expression
-
-    def gpr(self, *args, **kwargs):
-        return self.get_python_represenaion(*args, **kwargs)
-
-    def get_python_represenaion(self, expression, nosqrt=False, delta=False, relative_to_f=False):
-        delta = 'Delta_' if delta else ''
-        function_name = self.function_name
-        p = str(expression).replace('\\', '').replace('Delta ', 'Delta_')
-        c: str = Code(sp.Symbol('xxx'), p).raw_code[1:-1]
-
-        free_symbols: List[str] = [str(i).replace('\\', '').replace(
-            'Delta ', 'Delta_') for i in expression.free_symbols]
-        free_symbols = [i if str(
-            i) != function_name else f'{function_name}_data' for i in free_symbols]
-        free_symbols.sort()
-
-        if relative_to_f:
-            idx = c.find(function_name)
-            c = f'{c[:idx]}{function_name}_data{c[idx+1:]}'
-
-        return warp_in_function_syntax(
-            f'{delta}{function_name}', free_symbols, c)
-
-
-def mathpix(expression):
-    return '\['+expression+'\]'
-
-
-def warp_in_function_syntax(function_name: str, keys: List[str], return_value: str) -> str:
-    return f'def {function_name}({", ".join(keys)}):\n  return {return_value}'
+    @property
+    def deriv_cells_relative(self):
+        if not self._deriv_cells_relative:
+            self._deriv_cells_relative = [cell.subs(sp.Symbol('\\Delta '+str(symbol)), symbol * sp.Symbol('\\Delta '+str(symbol)+'_rel'))
+                                          for cell, symbol in zip(self.deriv_cells_over_f, self.free_symbols)]
+        return self._deriv_cells_relative
 
 
 class Ableiter:

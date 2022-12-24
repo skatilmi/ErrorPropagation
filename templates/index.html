@@ -1,32 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/styles/default.min.css" />
 <link rel="icon" href="http://www.domain.com/favicon.ico" type="image/x-icon" />
 <link rel="shortcut icon" href="/favicon.ico" />
 <script type="text/javascript" id="MathJax-script" async
   src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/styles/default.min.css" />
-<!-- <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" /> -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/highlight.min.js"></script>
-<script>
-  hljs.initHighlightingOnLoad();
-</script>
+<script>hljs.initHighlightingOnLoad();</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/canvg/1.5/canvg.min.js"></script>
-
 <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='funcs.js') }}"></script>
-<script type="text/javascript" id="MathJax-script" async
-  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
 <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/mainpage.css') }}" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+  integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous" />
 
 <head>
-  <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous" />
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{% block title %} Error Propagation {% endblock %}</title>
+  <title>{% block title %} Utilities - Home {% endblock %}</title>
 </head>
 
 
@@ -44,6 +39,7 @@
           <li class="nav-item"><a class="nav-link" id="nav-ableiter" href="/ableiter">Ableiter</a></li>
           <li class="nav-item"><a class="nav-link" id="nav-renderer" href="/renderer">Renderer</a></li>
           <li class="nav-item"><a class="nav-link" id="nav-demos" href="/demos">Demos</a></li>
+          <li class="nav-item"><a class="nav-link" id="nav-database" href="/database">Database</a></li>
         </ul>
       </div>
     </div>

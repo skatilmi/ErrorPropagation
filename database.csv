@@ -1,0 +1,7 @@
+fname;description;python
+l;linear function;a*x+b
+V;volume of a sphere;4*pi/3*r**3
+I_0;intensiy of a refelected light beam;(A-B)/(C-D)
+L;i don't know, you tell me;2*a*a/cos(x/b-varphi)**n
+q**2;inspired by the question;4*E_1*E_2*sin(theta/2)**2
+(d**2*sigma)/(dx*dq**2);hadronic photon structure;N_gamma*(2*pi*alpha**2)/(x*q**4)*((1+(1-y)**2)*F_2(x,q**2)-y**2*F_L(x,q**2))

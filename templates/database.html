@@ -1,0 +1,22 @@
+{% extends "index.html" %}
+{% block title %} Utilities - Database {% endblock %}
+{% block content %}
+<div class="demos">
+
+    {% if fields %}
+    {% for field in fields %}
+    <div class="content">
+        {{ field.description }}
+        <div class="latexField">
+            <div class="box content">
+                <div class="renderLatex">{{ field.latex_code_mathpix }}</div>
+                <button type="button" class="globe-button fa fa-globe"
+                    onclick="window.location.href='databse/{{field.demo_name}}'"></button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+</div>
+{% endblock %}

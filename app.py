@@ -1,6 +1,6 @@
 from markupsafe import escape
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
-from Error_minimal_for_web import Error_propagation, greek_letters, mathpix, Field, Demo, inline_rep, Ableiter, Renderer
+from Error_minimal_for_web import greek_letters, mathpix, Field, Demo, inline_rep, Ableiter, Renderer, Error_Propagation
 app = Flask(__name__)
 
 
@@ -15,15 +15,27 @@ demo_fields = [
          '2*a*a/cos(x/b-varphi)**n', 'dunno'),
     Demo(inline_rep('a*b*x'), 'a*b*x', 'x'),
     Demo('q^2 = 4 E_1 E_2 sin^2(\\theta/2)',
-         '4*E_1*E_2*sin(theta/2)**2', 'inspiration', fname='q^2'),
-    Demo('\\frac{d^2 \\sigma}{dxdq^2} = \\frac{2 \\pi N_{\gamma} \\alpha^{2} \\left(- y^{2} \\operatorname{F_{L}}{\\left(x,q^{2} \\right)} + \\left(\\left(1 - y\\right)^{2} + 1\\right) \\operatorname{F_{2}}{\\left(x,q^{2} \\right)}\\right)}{q^{4} x} ',
-         'N_gamma*(2*pi*alpha**2)/(x*q**4)*((1+(1-y)**2)*F_2(x,q**2)-y**2*F_L(x,q**2))', 'hadronic_photon_structure', fname='\\frac{d^2 \\sigma}{dxdq^2}'),
-
-
-
-
-
+         '4*E_1*E_2*sin(theta/2)**2',
+         'inspiration', fname='q**2'),
+    Demo(latex_code='\\frac{d^2 \\sigma}{dxdq^2} = \\frac{2 \\pi N_{\gamma} \\alpha^{2} \\left(- y^{2} \\operatorname{F_{L}}{\\left(x,q^{2} \\right)} + \\left(\\left(1 - y\\right)^{2} + 1\\right) \\operatorname{F_{2}}{\\left(x,q^{2} \\right)}\\right)}{q^{4} x} ',
+         # python_code='N_gamma*(2*pi*alpha**2)/(x*q**4)*((1+(1-y)**2)*F_2(x,q**2)-y**2*F_L(x,q**2))',
+         python_code='N_gamma*(2*pi*alpha**2)/(x*q**4)*((1+(1-y)**2)*F_2(x,q**2)-y**2*F_L(x,q**2))',
+         demo_name='hadronic_photon_structure',
+         # fname='\\frac{d^2 \\sigma}{dxdq^2}'
+         ),
 ]
+__demo_fields = {
+    'dunno': Demo(r'\frac{2 a^{2}}{\cos^{n}{\left(\frac{x}{b} -\varphi \right)}} ', '2*a*a/cos(x/b-varphi)**n', 'dunno'),
+    'x': Demo(inline_rep('a*b*x'), 'a*b*x', 'x'),
+    'q2': Demo('q^2 = 4 E_1 E_2 sin^2(\\theta/2)', '4*E_1*E_2*sin(theta/2)**2', 'inspiration', fname='q**2'),
+
+    'hadronic_photon_structure': Demo(latex_code='\\frac{d^2 \\sigma}{dxdq^2} = \\frac{2 \\pi N_{\gamma} \\alpha^{2} \\left(- y^{2} \\operatorname{F_{L}}{\\left(x,q^{2} \\right)} + \\left(\\left(1 - y\\right)^{2} + 1\\right) \\operatorname{F_{2}}{\\left(x,q^{2} \\right)}\\right)}{q^{4} x} ',
+                                      # python_code='N_gamma*(2*pi*alpha**2)/(x*q**4)*((1+(1-y)**2)*F_2(x,q**2)-y**2*F_L(x,q**2))',
+                                      python_code='N_gamma*(2*pi*alpha**2)/(x*q**4)*((1+(1-y)**2)*F_2(x,q**2)-y**2*F_L(x,q**2))',
+                                      demo_name='hadronic_photon_structure',
+                                      # fname='\\frac{d^2 \\sigma}{dxdq^2}'
+                                      ),
+}
 
 
 params_home = {"greek_letters": mathpix(
@@ -71,16 +83,13 @@ def page_demos():
 
 @ app.route('/demos/<demo_name>')
 def page_demos_list(demo_name):
+    _demo = demo_fields[demo_name] if demo_name in demo_fields else None
+
     for demo in demo_fields:
-        print(demo.demo_name)
         if demo.demo_name == demo_name:
-            E = Error_propagation(
-                demo.python_code, False, demo.fname)
-            E.do_error()
-            zeros = []
-            E.set_error_to_zero(zeros)
-            E.set_fields(zeros)
-            return render_template('comm.html', fields=E.fields)
+            form = {'zeros': '', 'relative_error': 'off', 'expression': demo.python_code, 'fname': demo.fname}
+            e = Error_Propagation(form)
+            return render_template('comm.html', fields=e.fields)
     return render_template('comm.html', fields=demo_fields)
 
 
@@ -88,15 +97,32 @@ def page_demos_list(demo_name):
 def page_error():
     if request.method == 'GET':
         return render_template('error.html', **params_home)
-    E = Error_propagation(
-        request.form['expression'], get_relative_error_checkbox(), request.form['fname'])
-    E.do_error()
-    zeros = []
-    if request.form['zeros'] != '':
-        zeros = list(request.form['zeros'].split(','))
-        E.set_error_to_zero(zeros)
-    E.set_fields(zeros)
-    return render_template('comm.html',  fields=E.fields)
+    e: Error_Propagation = Error_Propagation(request.form)
+    return render_template('comm.html',  fields=e.fields)
+
+
+@ app.route('/database/<entry_id>', methods=['POST', 'GET'])
+def database_error_id(entry_id):
+    if request.method == 'GET':
+        return render_template('database.html')
+    fields = [Field('a b')]
+    return render_template('database.html', fields=fields)
+
+
+@ app.route('/database')
+def database_error():
+    with open('database.csv', 'r') as f:
+        f.readline()
+        data = f.readlines()
+        data = [i.strip() for i in data]
+        data = [i.split(';') for i in data]
+    fields = []
+    for i in data:
+        fname = i[0]
+        description = i[1]
+        python_code = i[2]
+        fields.append(Field(python_code=python_code, fname=fname, description=description))
+    return render_template('database.html', fields=fields)
 
 
 def get_relative_error_checkbox():
@@ -107,6 +133,12 @@ def get_relative_error_checkbox():
     return relative_error
 
 
+@app.errorhandler(500)
+@app.errorhandler(404)
+def internal_error(error):
+    return render_template('catch_error_page.html'), 500
+
+
 if __name__ == '__main__':
-    # app.run(host='192.168.178.125', port=5000)
-    app.run(host='0.0.0.0')
+    # app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0', debug=True)
