@@ -20,6 +20,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 <head>
+  <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
     integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous" />
   <meta charset="UTF-8" />
@@ -27,6 +28,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block title %} Error Propagation {% endblock %}</title>
 </head>
+
 
 <body class="dark-theme">
   <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -38,10 +40,10 @@
       <a class="navbar-brand" href="/">utilities</a>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
-          <li class="nav-item "><a class="nav-link" href="/error">Error Propagation</a></li>
-          <li class="nav-item"><a class="nav-link" href="/ableiter">Ableiter</a></li>
-          <li class="nav-item"><a class="nav-link" href="/renderer">Renderer</a></li>
-          <li class="nav-item"><a class="nav-link" href="/demos">Demos</a></li>
+          <li class="nav-item"><a class="nav-link" id="nav-error" href="/error">Error Propagation</a></li>
+          <li class="nav-item"><a class="nav-link" id="nav-ableiter" href="/ableiter">Ableiter</a></li>
+          <li class="nav-item"><a class="nav-link" id="nav-renderer" href="/renderer">Renderer</a></li>
+          <li class="nav-item"><a class="nav-link" id="nav-demos" href="/demos">Demos</a></li>
         </ul>
       </div>
     </div>
@@ -49,8 +51,15 @@
 
 
   {% block content %} {% endblock %}
-
   <script>
+    // get current page and highlight in navbar
+    var current = window.location.pathname;
+    var nav = document.getElementById("nav-" + current.split("/")[1]);
+    nav.classList.add("active");
+
+  </script>
+  <script>
+
     var coll = document.getElementsByClassName("collapsible");
     var i;
 

@@ -1,11 +1,6 @@
-{% extends "index.html" %} {% block title %}Home{% endblock %} {% block content
-%}
-
+{% extends "index.html" %} {% block title %}Home{% endblock %} {% block content %}
 <div class="description">
-
-
   Renderer
-
   <div class="form">
     <form method="POST">
 
@@ -20,7 +15,7 @@
         <label>Expression Python:</label>
         <textarea type="text" rows="4" cols="50" name="expression_python" id="expression_python"></textarea><br />
       </div>
-      <input type="submit" value="Submit" /><br />
+      <input type="submit" value="Render Expression" /><br />
 
     </form>
     <script>
@@ -28,7 +23,6 @@
       document.getElementById("expression_latex").value = "{{request.form['expression_latex']}}";
     </script>
     <div>
-      <!-- area to display the rendered latex code -->
       {% if field %}
       <div class="renderer_area">
         {% with field=field %}
