@@ -2,15 +2,8 @@
 {% block title %} Utilities - Ableiter {% endblock %}
 {% block content %}
 <div class="description">
-
-
     <br />
     Ableiter
-    <style>
-        .form-description {
-            width: 100%;
-        }
-    </style>
     <div class="form">
         <form method="POST">
             <div class="form-description">
@@ -19,7 +12,6 @@
                     placeholder="a_0**2/cos(k_1/k_2)**4"></textarea>
             </div>
             <input type="submit" value="Calculate Derivatives" /><br />
-
     </div>
     <script>
         document.getElementById("input_expression").value = "{{request.form['expression']}}";
@@ -29,15 +21,14 @@
     </script>
     </form>
 
+</div>
+<div class="resultspage">
     {% if fields %}
-
     {% for field in fields %}
     {% with field=field %}
     {% include "latex_copyable.html" %}
     {% endwith %}
     {% endfor %}
-
-
     {% endif %}
 </div>
 

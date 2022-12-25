@@ -5,7 +5,9 @@ body {
 
 /* Add a dark theme style */
 
-
+.form-description {
+    width: 100%;
+}
 
 
 

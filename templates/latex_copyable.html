@@ -5,10 +5,12 @@
             <div class="renderLatex">{{ field.latex_code_mathpix }}</div>
             <div class="invizible latex-code">{{field.latex_code_raw}}</div>
             <div class="invizible python-code">{{field.python_code}}</div>
-            <button type="button" class="download-button fa fa-download"
+            <button type="button" class="download-button fa fa-download" title="Download as PNG"
                 onclick="downloadSVGAsPNG(this, 5)">PNG</button>
-            <button type="button" class="copy-button fa fa-copy" onclick="copyCodeNew(this,0)"> LaTeX</button>
-            <button type="button" class="copy-button fa fa-copy" onclick="copyCodeNew(this,1)"> Python</button>
+            <button type="button" class="copy-button fa fa-copy" title="Copy LaTeX code to clipboard"
+                onclick="copyCodeNew(this,0)"> LaTeX</button>
+            <button type="button" class="copy-button fa fa-copy" title="Copy Python code to clipboard"
+                onclick="copyCodeNew(this,1)"> Python</button>
         </div>
     </div>
 </div>

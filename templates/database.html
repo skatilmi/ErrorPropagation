@@ -1,6 +1,7 @@
 {% extends "index.html" %}
 {% block title %} Utilities - Database {% endblock %}
 {% block content %}
+
 <div class="demos">
 
     {% if fields %}
@@ -10,8 +11,14 @@
         <div class="latexField">
             <div class="box content">
                 <div class="renderLatex">{{ field.latex_code_mathpix }}</div>
-                <button type="button" class="globe-button fa fa-globe"
-                    onclick="window.location.href='databse/{{field.demo_name}}'"></button>
+                <div class="invizible latex-code">{{field.latex_code_raw}}</div>
+                <div class="invizible python-code">{{field.python_code}}</div>
+                <button type="button" class="copy-button fa fa-globe" title="Send to error propagation"
+                    onclick="window.location.href='database/{{loop.index}}'"></button>
+                <button type="button" class="copy-button fa fa-copy" title="Copy LaTeX code to clipboard"
+                    onclick="copyCodeNew(this,0)"> LaTeX</button>
+                <button type="button" class="copy-button fa fa-copy" title="Copy Python code to clipboard"
+                    onclick="copyCodeNew(this,1)"> Python</button>
             </div>
         </div>
     </div>

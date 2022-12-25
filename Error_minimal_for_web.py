@@ -2,12 +2,17 @@ import dataclasses
 import math
 import sympy as sp
 import numpy as np
+from sympy.parsing.latex import parse_latex
 
 from sympy.utilities.lambdify import lambdastr
 import inspect
 from typing import List
 
 from dataclasses import dataclass
+
+
+from sympy.parsing.sympy_parser import parse_expr, standard_transformations, implicit_multiplication_application, convert_xor
+transformations = (standard_transformations + (implicit_multiplication_application, ))
 
 greek_letters = ['alpha',  'delta', 'epsilon', 'eta',
                  'theta', 'iota', 'kappa', 'lambda', 'mu',
@@ -26,6 +31,10 @@ DEMOS = {'inspiration': ('4*E_1*E_2*sin(theta/2)**2', 'E_1'),
          'intensiy_of_refelected_light_beam': ('(A-B)/(C-D)', '')
 
          }
+
+
+def latex_to_sym(latex_expression):
+    return parse_expr(latex_expression, transformations=transformations)
 
 
 def inline_rep(expression):
@@ -57,14 +66,7 @@ class Field:
 
         self.python_code = python_code
         if '=' in str(python_code):
-            print(python_code)
             self.python_code = python_code.split('=')[-1]
-            print(self.python_code)
-        if as_function:
-            if '=' in latex_code:
-                print('ok')
-        # get_python_representation(python_code, fname, delta=True)
-
         self.editable = False
 
 
@@ -185,21 +187,21 @@ class Error_Propagation:
 
     def feed_field_error(self):
         sqrt_sum_squared_errors = sp.sqrt(sum(sp.simplify(i**2) for i in self.deriv_cells))
-        latex_expression = latex_gleichung(sp.Symbol('\\Delta '+self.input_function_name), sqrt_sum_squared_errors)
+        latex_expression = latex_gleichung(sp.Symbol(rf'\Delta {self.input_function_name}'), sqrt_sum_squared_errors)
         return Field(latex_code=latex_expression, python_code=get_python_representation(sqrt_sum_squared_errors, self.input_function_name, delta=True))
 
     def feed_field_error_relative_f(self):
         sqrt_sum_squared_errors = self.input_function_name_sympy * sp.sqrt(sum(sp.simplify(i**2) for i in self.deriv_cells_over_f))
-        latex_expression = latex_gleichung(sp.Symbol('\\Delta '+self.input_function_name), sqrt_sum_squared_errors)
+        latex_expression = latex_gleichung(sp.Symbol(rf'\Delta {self.input_function_name}'), sqrt_sum_squared_errors)
         return Field(latex_code=latex_expression, python_code=get_python_representation(sqrt_sum_squared_errors, self.input_function_name, relative_to_f=True, delta=True))
 
     def feed_field_error_relative_params(self):
         sqrt_sum_squared_errors = self.input_function_name_sympy * sp.sqrt(sum(sp.simplify(i**2) for i in self.deriv_cells_relative))
-        latex_expression = latex_gleichung(sp.Symbol('\\Delta '+self.input_function_name), sqrt_sum_squared_errors)
+        latex_expression = latex_gleichung(sp.Symbol(rf'\Delta {self.input_function_name}'), sqrt_sum_squared_errors)
         return Field(latex_code=latex_expression)
 
     def derivate(self, symbol: str, f_: sp.Expr):
-        return sp.diff(f_, sp.Symbol(symbol)) * sp.Symbol('\\Delta '+symbol) if symbol not in greek_letters else sp.Symbol('\\Delta '+'\\'+symbol)
+        return sp.diff(f_, sp.Symbol(symbol)) * sp.Symbol(rf'\Delta {symbol}') if symbol not in greek_letters else sp.Symbol(rf'\Delta \{symbol}')
 
     @property
     def deriv_cells(self):
@@ -216,8 +218,11 @@ class Error_Propagation:
     @property
     def deriv_cells_relative(self):
         if not self._deriv_cells_relative:
-            self._deriv_cells_relative = [cell.subs(sp.Symbol('\\Delta '+str(symbol)), symbol * sp.Symbol('\\Delta '+str(symbol)+'_rel'))
-                                          for cell, symbol in zip(self.deriv_cells_over_f, self.free_symbols)]
+            self._deriv_cells_relative = []
+            for cell, symbol in zip(self.deriv_cells_over_f, self.free_symbols):
+                symbol = symbol if symbol not in greek_letters else rf'\{symbol}'
+                to_append = cell.subs(sp.Symbol(rf'\Delta {symbol}'), symbol * sp.Symbol(rf'\Delta {symbol}__\%'))
+                self._deriv_cells_relative.append(to_append)
         return self._deriv_cells_relative
 
 
@@ -246,11 +251,14 @@ class Ableiter:
         self.params['derivatives_python_as_function'] = [
             Code.replace(i) for i in self.params['derivatives_python']]
 
+# a,b,c,d,e,k,A,R
+# 0,1,2,3,4,5,6,7
+
 
 class Renderer:
     def __init__(self, expression_latex='', expression_python="") -> None:
         self.expression_latex = expression_latex
-        self.expression_python = expression_python
+        self.expression_python = expression_python.replace('np.', '').replace('math.', '').replace('sp.', '')
         self.params = {}
         if expression_latex and not expression_python:
             self.latex = expression_latex
@@ -261,3 +269,12 @@ class Renderer:
             self.params['rendered'] = mathpix(self.latex)
         else:
             self.params['rendered'] = mathpix(expression_latex)
+
+        if expression_latex and expression_python:
+            self.field = Field(latex_code=expression_latex, python_code=expression_python)
+
+        else:
+            if expression_latex:
+                self.field = Field(latex_code=expression_latex, python_code=latex_to_sym(expression_latex))
+            elif expression_python:
+                self.field = Field(latex_code=sp.latex(sp.parse_expr((expression_python))), python_code=expression_python)

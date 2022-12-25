@@ -25,18 +25,18 @@
   <div class="form">
     <form method="POST">
       <div class="fromdescription">
-        <label>function name:</label><br />
+        <label>function name:</label>
         <textarea type="text" rows="2" cols="50" name="fname" id="fname"></textarea><br />
       </div>
 
       <div class="fromdescription">
-        <label>expression:</label><br />
+        <label>expression:</label>
         <textarea type="text" rows="2" cols="50" name="expression" id="expression"></textarea><br />
 
       </div>
 
       <div class="fromdescription">
-        <label>set error of following variables to zero (works not every time) </label><br />
+        <label>set error of following variables to zero (works not every time) </label>
         <input type="text" name="zeros" placeholder="k_1" /><br />
       </div>
       <input type="submit" value="Calculate Error Propagation" /><br />
@@ -49,8 +49,7 @@
 
       <div class="fromdescription">
         <input type="checkbox" id="relative_error" name="relative_error" />
-        <label for="relative_error">substitute error of symbols with their relative_error (doesnt work
-          properly, use at your own risk)</label>
+        <label for="relative_error">substitute error of symbols with their relative error (experimental)</label>
         <input type="hidden" name="relative_error" value="off" />
       </div>
     </form>
@@ -73,8 +72,6 @@
     const excludeExtra = ['exp', 'sqrt', 'sin', 'cos', 'tan', 'sinc', 'atan', 'asin', 'acos', 'tanh', 'sinh', 'cosh', 'log', 'abs', 'max', 'min'];
     expressionTextarea.addEventListener('input', () => {
       const expression = expressionTextarea.value;
-      // Split the expression into an array of substrings based on "*", " " and "/" characters
-      //<!-- const substrings = expression.split(/[* /().-^\d]/); -->
       const substrings = expression.split(/[* /().-]/);
       var smybols = [];
       let regex = /^-?\d*\.?\d+$/;
@@ -86,7 +83,6 @@
 
         }
       }
-      // remove duplicates
       smybols = [...new Set(smybols)];
       for (const symbol of smybols) {
         const checkbox = document.createElement('input');

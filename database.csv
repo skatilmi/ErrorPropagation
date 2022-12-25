@@ -5,3 +5,9 @@ I_0;intensiy of a refelected light beam;(A-B)/(C-D)
 L;i don't know, you tell me;2*a*a/cos(x/b-varphi)**n
 q**2;inspired by the question;4*E_1*E_2*sin(theta/2)**2
 (d**2*sigma)/(dx*dq**2);hadronic photon structure;N_gamma*(2*pi*alpha**2)/(x*q**4)*((1+(1-y)**2)*F_2(x,q**2)-y**2*F_L(x,q**2))
+y;merry chrysler;ln(x/m-s*a)/r**2
+q(t);Spielers Charge;Q_s/(1+C_d/C_i)*(1-exp(-t/tau_u))
+f_con(u);Gain of an APD;A/(1-(U/U_b)**k) +1-A
+m(u);pulsed light fit function of gain of an APD ;R*f_con(U,A,U_b,k)/(1+C_d(U,p_0,p_1,p_2,p_3,p_4))
+m(u);full pulsed light fit function of gain of an APD ;R*(A/(1-(U/U_b)**k) +1-A)/(1+p_4*(p_0/(sqrt(1+p_1*U))-1/(1+exp(-p_2*(U-p_3)))))
+c_d;detector capacitance;p_4*(p_0/(sqrt(1+p_1*U))-1/(1+exp(-p_2*(U-p_3))))

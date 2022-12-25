@@ -1,0 +1,43 @@
+{% extends "index.html" %}
+{% block title %} Utilities - wikiscraper {% endblock %}
+{% block content %}
+<div class="form">
+    <form method="POST">
+        <div class="fromdescription">
+            <label>wikipedia link</label>
+            <textarea type="text" rows="2" cols="50" name="wikilink" id="wikilink"></textarea><br />
+            <input type="submit" value="scrape for equations on page" /><br />
+    </form>
+</div>
+
+<div class="resultspage">
+    {% if fields %}
+    {% for field in fields %}
+    {% with field=field %}
+    {% include "latex_copyable.html" %}
+    {% endwith %}
+    <script>
+        var buttons = document.getElementsByClassName("copy-button");
+        for (var i = buttons.length - 3; i < buttons.length; i++) {
+            if (buttons[i].innerHTML == " Python") {
+                buttons[i].parentNode.removeChild(buttons[i]);
+            }
+        }
+    </script>
+    {% endfor %}
+    {% endif %}
+</div>
+
+
+<script>
+    // delete all buttons which say " Python"
+    document.getElementById("wikilink").value = "{{request.form['wikilink']}}";
+    if (document.getElementById("wikilink").value == "") {
+        document.getElementById("wikilink").value = "https://en.wikipedia.org/wiki/Schr%C3%B6dinger_equation";
+    }
+
+
+</script>
+{% endblock %}
+
+{\displaystyle \Psi (x,t)=\langle x|\Psi (t)\rangle .}
